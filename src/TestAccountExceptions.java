@@ -1,4 +1,4 @@
-import exceptions.*;
+import com.gdb.exceptions.*;
 
 public class TestAccountExceptions {
 

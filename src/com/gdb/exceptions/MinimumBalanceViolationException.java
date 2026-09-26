@@ -1,4 +1,4 @@
-package exceptions;
+package com.gdb.exceptions;
 
 public class MinimumBalanceViolationException extends AccountException {
 
