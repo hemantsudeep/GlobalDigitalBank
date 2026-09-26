@@ -11,7 +11,7 @@ public class TestAccountSubclasses {
 
         // Step 1: SavingsAccount
         // Parent reference points to SavingsAccount object
-        Account savings = new SavingsAccount(
+        AbstractAccount savings = new SavingsAccount(
                 "SAV1001",
                 "Rajesh Sharma",
                 28,
@@ -48,7 +48,7 @@ public class TestAccountSubclasses {
         }
 
         // Step 2: CurrentAccount
-        Account current = new CurrentAccount(
+        AbstractAccount current = new CurrentAccount(
                 "CUR1001",
                 "Priya Patel",
                 34,
@@ -117,7 +117,7 @@ public class TestAccountSubclasses {
         }
 
         // Step 4: FixedDepositAccount
-        Account fixedDeposit = new FixedDepositAccount(
+        AbstractAccount fixedDeposit = new FixedDepositAccount(
                 "FD1001",
                 "Amit Kumar",
                 45,
