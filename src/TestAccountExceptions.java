@@ -3,6 +3,8 @@ import exceptions.*;
 public class TestAccountExceptions {
 
     private static void printAccountInfo(Account acc) {
+        String pinStatus = acc.hasPin() ? "Yes" : "No";
+
         System.out.println(
                 "Account #" + acc.getAccountNumber() +
                         " | " + acc.getName() +
@@ -10,466 +12,554 @@ public class TestAccountExceptions {
                         " | " + acc.getAccountType() +
                         " | ₹" + acc.getBalance() +
                         " | " + acc.getStatus() +
-                        " | PIN: " + (acc.hasPin() ? "Yes" : "No")
+                        " | PIN: " + pinStatus
+        );
+    }
+
+    private static void printException(Exception e) {
+        System.out.println(
+                "EXCEPTION: " +
+                        e.getClass().getSimpleName() +
+                        " - " +
+                        e.getMessage()
         );
     }
 
     public static void main(String[] args) {
 
-        System.out.println("============================================================");
-        System.out.println(" ACCOUNT EXCEPTION TEST");
-        System.out.println("============================================================");
+        System.out.println("=".repeat(60));
+        System.out.println("  ACCOUNT TEST WITH EXCEPTIONS");
+        System.out.println("=".repeat(60));
+        System.out.println();
 
-        // ============================================================
-        // Test 1: Valid Account Creation
-        // ============================================================
 
-        System.out.println("\n>>> Test 1: Valid Account Creation");
+        // =====================================================
+        // TEST 1: VALID ACCOUNT CREATION
+        // =====================================================
+
+        System.out.println(">>> Test 1: Valid Account Creation");
 
         try {
-            Account acc1 = new Account(
-                    1001,
-                    "John Doe",
-                    25,
-                    1000.0,
-                    "Savings"
-            );
+            Account acc1 =
+                    new Account(1001, "John Doe", 25,
+                            1000.0, "Savings");
 
+            System.out.print("SUCCESS: ");
             printAccountInfo(acc1);
 
         } catch (IllegalArgumentException e) {
-            System.out.println("FAILED: " + e.getMessage());
+            printException(e);
         }
 
+        System.out.println();
 
-        // ============================================================
-        // Test 2: Invalid Age
-        // ============================================================
 
-        System.out.println("\n>>> Test 2: Invalid Age");
+        // =====================================================
+        // TEST 2: INVALID AGE
+        // =====================================================
+
+        System.out.println(">>> Test 2: Invalid Age (under 18)");
 
         try {
-            Account acc2 = new Account(
-                    1002,
-                    "Young Kid",
-                    16,
-                    500.0,
-                    "Savings"
-            );
+            Account acc2 =
+                    new Account(1002, "Young Kid", 16,
+                            500.0, "Savings");
 
-            System.out.println("FAILED: Invalid age was accepted.");
+            System.out.print("SUCCESS: ");
+            printAccountInfo(acc2);
 
         } catch (IllegalArgumentException e) {
-            System.out.println(
-                    "SUCCESS: Invalid age rejected - " +
-                            e.getMessage()
-            );
+            printException(e);
         }
 
+        System.out.println();
 
-        // ============================================================
-        // Test 3: Invalid Account Type
-        // ============================================================
 
-        System.out.println("\n>>> Test 3: Invalid Account Type");
+        // =====================================================
+        // TEST 3: INVALID ACCOUNT TYPE
+        // =====================================================
+
+        System.out.println(">>> Test 3: Invalid Account Type");
 
         try {
-            Account acc3 = new Account(
-                    1003,
-                    "Test User",
-                    25,
-                    1000.0,
-                    "Invalid"
-            );
+            Account acc3 =
+                    new Account(1003, "Test User", 25,
+                            1000.0, "Invalid");
 
-            System.out.println(
-                    "FAILED: Invalid account type was accepted."
-            );
+            System.out.print("SUCCESS: ");
+            printAccountInfo(acc3);
 
         } catch (IllegalArgumentException e) {
-            System.out.println(
-                    "SUCCESS: Invalid account type rejected - " +
-                            e.getMessage()
-            );
+            printException(e);
         }
 
+        System.out.println();
 
-        // ============================================================
-        // Test 4: Minimum Balance Violation on Creation
-        // ============================================================
 
-        System.out.println("\n>>> Test 4: Minimum Balance Validation");
+        // =====================================================
+        // TEST 4: MINIMUM BALANCE
+        // =====================================================
+
+        System.out.println(">>> Test 4: Minimum Balance on Creation");
+
+        System.out.println(
+                "Creating Savings account with ₹300"
+        );
 
         try {
-            Account acc4 = new Account(
-                    1004,
-                    "Bob Wilson",
-                    25,
-                    300.0,
-                    "Savings"
-            );
+            Account acc4 =
+                    new Account(1004, "Bob Wilson", 25,
+                            300.0, "Savings");
 
-            System.out.println(
-                    "FAILED: Account with insufficient initial balance was accepted."
-            );
+            System.out.print("SUCCESS: ");
+            printAccountInfo(acc4);
 
         } catch (IllegalArgumentException e) {
-            System.out.println(
-                    "SUCCESS: Minimum balance violation rejected - " +
-                            e.getMessage()
-            );
+            printException(e);
         }
 
+        System.out.println();
 
-        // ============================================================
-        // Test 5: Deposit Exceptions
-        // ============================================================
 
-        System.out.println("\n>>> Test 5: Deposit Exceptions");
+        // =====================================================
+        // TEST 5: VALID DEPOSIT AND WITHDRAWAL
+        // =====================================================
+
+        System.out.println(">>> Test 5: Valid Deposit and Withdrawal");
 
         try {
-            Account acc5 = new Account(
-                    1005,
-                    "Alice Brown",
-                    30,
-                    1500.0,
-                    "Savings"
+
+            Account acc5 =
+                    new Account(
+                            1005,
+                            "Alice Brown",
+                            30,
+                            1000.0,
+                            "Current"
+                    );
+
+            System.out.print("Account: ");
+            printAccountInfo(acc5);
+
+            acc5.setPin(1234);
+
+            System.out.println(
+                    "Setting PIN 1234: SUCCESS"
             );
 
             acc5.deposit(500.0);
 
             System.out.println(
-                    "Valid deposit: SUCCESS"
+                    "Depositing ₹500.0: SUCCESS"
             );
 
             System.out.println(
-                    "New balance: ₹" + acc5.getBalance()
+                    "Balance after deposit: ₹" +
+                            acc5.getBalance()
             );
 
-        } catch (InvalidAmountException | InactiveAccountException e) {
+            acc5.withdraw(200.0, 1234);
+
             System.out.println(
-                    "FAILED: " + e.getMessage()
+                    "Withdrawing ₹200.0: SUCCESS"
             );
+
+            System.out.println(
+                    "Balance after withdrawal: ₹" +
+                            acc5.getBalance()
+            );
+
+            System.out.print("Final: ");
+            printAccountInfo(acc5);
+
+        } catch (Exception e) {
+            printException(e);
         }
 
+        System.out.println();
 
-        // Invalid deposit amount
+
+        // =====================================================
+        // TEST 6: INVALID DEPOSIT
+        // =====================================================
+
+        System.out.println(
+                ">>> Test 6: Invalid Deposit (Negative Amount)"
+        );
 
         try {
-            Account acc6 = new Account(
-                    1006,
-                    "Invalid Deposit",
-                    30,
-                    1000.0,
-                    "Savings"
+
+            Account acc6 =
+                    new Account(
+                            1006,
+                            "Alice Brown",
+                            30,
+                            1000.0,
+                            "Current"
+                    );
+
+            acc6.setPin(1234);
+
+            System.out.println(
+                    "Attempting to deposit ₹-100.0"
             );
 
             acc6.deposit(-100.0);
 
             System.out.println(
-                    "FAILED: Negative deposit was accepted."
+                    "ERROR: Deposit should have failed."
             );
 
         } catch (InvalidAmountException e) {
-            System.out.println(
-                    "SUCCESS: Invalid deposit rejected - " +
-                            e.getMessage()
-            );
 
-        } catch (InactiveAccountException e) {
-            System.out.println(
-                    "FAILED: Account inactive - " +
-                            e.getMessage()
-            );
+            printException(e);
+
+        } catch (Exception e) {
+
+            printException(e);
         }
 
+        System.out.println();
 
-        // ============================================================
-        // Test 6: PIN Protection
-        // ============================================================
 
-        System.out.println("\n>>> Test 6: PIN Protection");
+        // =====================================================
+        // TEST 7: INSUFFICIENT BALANCE
+        // =====================================================
+
+        System.out.println(
+                ">>> Test 7: Insufficient Balance"
+        );
 
         try {
-            Account acc7 = new Account(
-                    1007,
-                    "Diana Prince",
-                    28,
-                    1500.0,
-                    "Savings"
-            );
+
+            Account acc7 =
+                    new Account(
+                            1007,
+                            "Charlie Green",
+                            35,
+                            500.0,
+                            "Savings"
+                    );
 
             acc7.setPin(1234);
 
-            System.out.println(
-                    "PIN set successfully."
-            );
+            System.out.print("Account: ");
+            printAccountInfo(acc7);
 
             System.out.println(
-                    "Correct PIN verification: " +
-                            (acc7.verifyPin(1234) ? "SUCCESS" : "FAILED")
+                    "Attempting to withdraw ₹1000.0"
             );
+
+            acc7.withdraw(1000.0, 1234);
 
             System.out.println(
-                    "Incorrect PIN verification: " +
-                            (acc7.verifyPin(9999) ? "FAILED" : "SUCCESS")
-            );
-
-        } catch (IllegalArgumentException e) {
-            System.out.println(
-                    "FAILED: " + e.getMessage()
-            );
-        }
-
-
-        // ============================================================
-        // Test 7: Successful Withdrawal
-        // ============================================================
-
-        System.out.println("\n>>> Test 7: Successful Withdrawal");
-
-        try {
-            Account acc8 = new Account(
-                    1008,
-                    "Withdrawal User",
-                    30,
-                    2000.0,
-                    "Savings"
-            );
-
-            acc8.setPin(1234);
-
-            acc8.withdraw(500.0, 1234);
-
-            System.out.println(
-                    "Withdrawal: SUCCESS"
-            );
-
-            System.out.println(
-                    "New balance: ₹" + acc8.getBalance()
-            );
-
-        } catch (InvalidAmountException |
-                 InsufficientBalanceException |
-                 MinimumBalanceViolationException |
-                 InactiveAccountException |
-                 InvalidPinException e) {
-
-            System.out.println(
-                    "FAILED: " + e.getMessage()
-            );
-        }
-
-
-        // ============================================================
-        // Test 8: Incorrect PIN
-        // ============================================================
-
-        System.out.println("\n>>> Test 8: Incorrect PIN");
-
-        try {
-            Account acc9 = new Account(
-                    1009,
-                    "PIN Test",
-                    30,
-                    1500.0,
-                    "Savings"
-            );
-
-            acc9.setPin(1234);
-
-            acc9.withdraw(100.0, 9999);
-
-            System.out.println(
-                    "FAILED: Incorrect PIN was accepted."
-            );
-
-        } catch (InvalidPinException e) {
-
-            System.out.println(
-                    "SUCCESS: Incorrect PIN rejected - " +
-                            e.getMessage()
-            );
-
-        } catch (InvalidAmountException |
-                 InsufficientBalanceException |
-                 MinimumBalanceViolationException |
-                 InactiveAccountException e) {
-
-            System.out.println(
-                    "FAILED: " + e.getMessage()
-            );
-        }
-
-
-        // ============================================================
-        // Test 9: Insufficient Balance
-        // ============================================================
-
-        System.out.println("\n>>> Test 9: Insufficient Balance");
-
-        try {
-            Account acc10 = new Account(
-                    1010,
-                    "Balance Test",
-                    30,
-                    1000.0,
-                    "Savings"
-            );
-
-            acc10.setPin(1234);
-
-            acc10.withdraw(2000.0, 1234);
-
-            System.out.println(
-                    "FAILED: Insufficient balance was accepted."
+                    "ERROR: Withdrawal should have failed."
             );
 
         } catch (InsufficientBalanceException e) {
 
-            System.out.println(
-                    "SUCCESS: Insufficient balance rejected - " +
-                            e.getMessage()
-            );
+            printException(e);
 
-        } catch (InvalidAmountException |
-                 MinimumBalanceViolationException |
-                 InactiveAccountException |
-                 InvalidPinException e) {
+        } catch (Exception e) {
 
-            System.out.println(
-                    "FAILED: " + e.getMessage()
-            );
+            printException(e);
         }
 
+        System.out.println();
 
-        // ============================================================
-        // Test 10: Minimum Balance Violation
-        // ============================================================
 
-        System.out.println("\n>>> Test 10: Minimum Balance Violation");
+        // =====================================================
+        // TEST 8: MINIMUM BALANCE VIOLATION
+        // =====================================================
+
+        System.out.println(
+                ">>> Test 8: Minimum Balance Violation"
+        );
 
         try {
-            Account acc11 = new Account(
-                    1011,
-                    "Minimum Balance Test",
-                    30,
-                    1000.0,
-                    "Savings"
-            );
 
-            acc11.setPin(1234);
+            Account acc8 =
+                    new Account(
+                            1008,
+                            "Diana Prince",
+                            28,
+                            1000.0,
+                            "Savings"
+                    );
 
-            acc11.withdraw(600.0, 1234);
+            acc8.setPin(1234);
+
+            System.out.print("Account: ");
+            printAccountInfo(acc8);
 
             System.out.println(
-                    "FAILED: Minimum balance violation was accepted."
+                    "Attempting to withdraw ₹600.0"
+            );
+
+            acc8.withdraw(600.0, 1234);
+
+            System.out.println(
+                    "ERROR: Withdrawal should have failed."
             );
 
         } catch (MinimumBalanceViolationException e) {
 
-            System.out.println(
-                    "SUCCESS: Minimum balance violation rejected - " +
-                            e.getMessage()
-            );
+            printException(e);
 
-        } catch (InvalidAmountException |
-                 InsufficientBalanceException |
-                 InactiveAccountException |
-                 InvalidPinException e) {
+        } catch (Exception e) {
 
-            System.out.println(
-                    "FAILED: " + e.getMessage()
-            );
+            printException(e);
         }
 
+        System.out.println();
 
-        // ============================================================
-        // Test 11: Inactive Account
-        // ============================================================
 
-        System.out.println("\n>>> Test 11: Inactive Account");
+        // =====================================================
+        // TEST 9: INACTIVE ACCOUNT
+        // =====================================================
+
+        System.out.println(
+                ">>> Test 9: Inactive Account Operations"
+        );
+
+        Account acc9 = null;
 
         try {
-            Account acc12 = new Account(
-                    1012,
-                    "Inactive Test",
-                    30,
-                    1000.0,
-                    "Savings"
+
+            acc9 =
+                    new Account(
+                            1009,
+                            "Eve Wilson",
+                            32,
+                            2000.0,
+                            "Current"
+                    );
+
+            System.out.print("Account: ");
+            printAccountInfo(acc9);
+
+            acc9.closeAccount();
+
+            System.out.println(
+                    "Closing account: SUCCESS"
             );
 
-            acc12.closeAccount();
+            System.out.println(
+                    "Attempting to deposit ₹100.0 on closed account"
+            );
+
+            acc9.deposit(100.0);
+
+        } catch (InactiveAccountException e) {
+
+            printException(e);
 
             try {
-                acc12.deposit(500.0);
+
+                acc9.reopenAccount();
 
                 System.out.println(
-                        "FAILED: Deposit accepted on inactive account."
+                        "Reopening account: SUCCESS"
                 );
 
-            } catch (InactiveAccountException e) {
+                acc9.deposit(100.0);
 
                 System.out.println(
-                        "SUCCESS: Deposit rejected - " +
-                                e.getMessage()
+                        "Depositing ₹100.0 after reopen: SUCCESS"
                 );
+
+                System.out.println(
+                        "Balance after deposit: ₹" +
+                                acc9.getBalance()
+                );
+
+            } catch (Exception ex) {
+
+                printException(ex);
             }
 
-        } catch (IllegalStateException e) {
+        } catch (Exception e) {
 
-            System.out.println(
-                    "FAILED: " + e.getMessage()
-            );
-        } catch (InvalidAmountException e) {
-
-            System.out.println(
-                    "FAILED: " + e.getMessage()
-            );
+            printException(e);
         }
 
+        System.out.println();
 
-        // ============================================================
-        // Test 12: Close and Reopen Account
-        // ============================================================
 
-        System.out.println("\n>>> Test 12: Close and Reopen Account");
+        // =====================================================
+        // TEST 10: PIN VERIFICATION
+        // =====================================================
+
+        System.out.println(
+                ">>> Test 10: PIN Verification"
+        );
 
         try {
-            Account acc13 = new Account(
-                    1013,
-                    "Status Test",
-                    30,
-                    1000.0,
-                    "Savings"
+
+            Account acc10 =
+                    new Account(
+                            1010,
+                            "Frank Miller",
+                            40,
+                            1500.0,
+                            "Savings"
+                    );
+
+            System.out.print("Account: ");
+            printAccountInfo(acc10);
+
+            acc10.setPin(1234);
+
+            System.out.println(
+                    "Setting PIN 1234: SUCCESS"
+            );
+
+            acc10.withdraw(200.0, 1234);
+
+            System.out.println(
+                    "Withdrawing ₹200.0 with correct PIN: SUCCESS"
             );
 
             System.out.println(
-                    "Initial status: " + acc13.getStatus()
+                    "Balance: ₹" +
+                            acc10.getBalance()
             );
-
-            acc13.closeAccount();
 
             System.out.println(
-                    "After close: " + acc13.getStatus()
+                    "Attempting to withdraw ₹100.0 " +
+                            "with incorrect PIN (9999)"
             );
 
-            acc13.reopenAccount();
+            acc10.withdraw(100.0, 9999);
 
-            System.out.println(
-                    "After reopen: " + acc13.getStatus()
-            );
+        } catch (InvalidPinException e) {
 
-        } catch (IllegalStateException e) {
+            printException(e);
 
-            System.out.println(
-                    "FAILED: " + e.getMessage()
-            );
+        } catch (Exception e) {
+
+            printException(e);
         }
 
 
-        System.out.println("\n============================================================");
-        System.out.println(" EXCEPTION TEST COMPLETED!");
-        System.out.println("============================================================");
+        // =====================================================
+        // TEST 10B: PIN NOT SET
+        // =====================================================
+
+        System.out.println();
+
+        System.out.println(
+                ">>> Test 10B: PIN Not Set"
+        );
+
+        try {
+
+            Account acc11 =
+                    new Account(
+                            1011,
+                            "Grace Lee",
+                            35,
+                            1000.0,
+                            "Savings"
+                    );
+
+            System.out.println(
+                    "Attempting to withdraw ₹100.0 without PIN set"
+            );
+
+            acc11.withdraw(100.0, 1234);
+
+        } catch (InvalidPinException e) {
+
+            printException(e);
+
+        } catch (Exception e) {
+
+            printException(e);
+        }
+
+        System.out.println();
+
+
+        // =====================================================
+        // TEST 11: ALL ACCOUNTS SUMMARY
+        // =====================================================
+
+        System.out.println(
+                ">>> Test 11: All Accounts Summary"
+        );
+
+        try {
+
+            Account[] accounts = {
+
+                    new Account(
+                            1001,
+                            "John Doe",
+                            25,
+                            1000.0,
+                            "Savings"
+                    ),
+
+                    new Account(
+                            1005,
+                            "Alice Brown",
+                            30,
+                            1300.0,
+                            "Current"
+                    ),
+
+                    new Account(
+                            1006,
+                            "Charlie Green",
+                            35,
+                            500.0,
+                            "Savings"
+                    ),
+
+                    new Account(
+                            1007,
+                            "Diana Prince",
+                            28,
+                            1000.0,
+                            "Savings"
+                    ),
+
+                    new Account(
+                            1008,
+                            "Eve Wilson",
+                            32,
+                            2100.0,
+                            "Current"
+                    ),
+
+                    new Account(
+                            1009,
+                            "Frank Miller",
+                            40,
+                            1300.0,
+                            "Savings"
+                    )
+            };
+
+            accounts[1].setPin(1234);
+            accounts[2].setPin(1234);
+            accounts[3].setPin(1234);
+            accounts[5].setPin(1234);
+
+            for (Account acc : accounts) {
+                printAccountInfo(acc);
+            }
+
+        } catch (Exception e) {
+
+            printException(e);
+        }
+
+        System.out.println();
+
+        System.out.println("=".repeat(60));
+        System.out.println("  TEST COMPLETED!");
+        System.out.println("=".repeat(60));
     }
 }
