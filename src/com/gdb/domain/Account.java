@@ -3,6 +3,7 @@ package com.gdb.domain;
 import com.gdb.exceptions.*;
 
 public class Account {
+
     protected String accountNumber;
     protected String name;
     protected int age;
@@ -44,6 +45,7 @@ public class Account {
     }
 
     public boolean changePin(String oldPin, String newPin) {
+
         if (!validatePin(oldPin)) {
             return false;
         }
@@ -94,6 +96,7 @@ public class Account {
     }
 
     public void displayAccountInfo() {
+
         System.out.println("Account Number: " + accountNumber);
         System.out.println("Name: " + name);
         System.out.println("Age: " + age);
