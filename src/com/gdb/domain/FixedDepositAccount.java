@@ -2,7 +2,7 @@ package com.gdb.domain;
 
 import com.gdb.exceptions.*;
 
-public class FixedDepositAccount extends Account {
+public class FixedDepositAccount extends AbstractAccount {
 
     private int tenureMonths;
     private double interestRate;
@@ -29,7 +29,7 @@ public class FixedDepositAccount extends Account {
     }
 
     @Override
-    public void withdraw(double amount, String enteredPin)
+    public void processDebit(double amount)
             throws AccountException {
 
         throw new AccountException(

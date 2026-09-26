@@ -1,6 +1,8 @@
 package com.gdb.domain;
 
-public class SalaryAccount extends Account {
+import com.gdb.exceptions.*;
+
+public class SalaryAccount extends AbstractAccount {
 
     private int inactiveMonths;
     private String employerName;
@@ -23,6 +25,19 @@ public class SalaryAccount extends Account {
 
         this.employerName = employerName;
         this.inactiveMonths = 0;
+    }
+
+    @Override
+    public void processDebit(double amount)
+            throws AccountException {
+
+        if (amount > balance) {
+
+            throw new InsufficientBalanceException(
+                    "Insufficient funds in Salary account");
+        }
+
+        balance -= amount;
     }
 
     public String getEmployerName() {

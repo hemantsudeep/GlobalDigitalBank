@@ -2,7 +2,7 @@ package com.gdb.domain;
 
 import com.gdb.exceptions.*;
 
-public class SavingsAccount extends Account {
+public class SavingsAccount extends AbstractAccount {
 
     private double minBalance = 1000.0;
     private double interestRate = 4.0;
@@ -45,37 +45,24 @@ public class SavingsAccount extends Account {
     }
 
     @Override
-    public void withdraw(double amount, String enteredPin)
+    public void processDebit(double amount)
             throws AccountException {
 
-        if (!validatePin(enteredPin)) {
-            throw new InvalidPinException(
-                    "Invalid PIN entered");
-        }
+        if ((balance - amount) < minBalance) {
 
-        if (!"ACTIVE".equalsIgnoreCase(this.status)) {
-            throw new InactiveAccountException(
-                    "Account is not active");
-        }
-
-        if (amount <= 0) {
-            throw new InvalidAmountException(
-                    "Withdrawal amount must be positive");
-        }
-
-        if ((this.balance - amount) < this.minBalance) {
             throw new MinimumBalanceViolationException(
                     "Cannot breach minimum balance of Rs "
                             + minBalance);
         }
 
-        this.balance -= amount;
+        balance -= amount;
     }
 
     public void applyInterest() {
 
         double interest =
-                this.balance * (interestRate / 100.0);
+                this.balance *
+                        (interestRate / 100.0);
 
         this.balance += interest;
     }
