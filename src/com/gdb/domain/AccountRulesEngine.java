@@ -1,124 +1,121 @@
-package com.gdb.domain;
 
-import java.util.HashMap;
-import java.util.Map;
+package com.gdb.domain;
 
 public class AccountRulesEngine {
 
-    // =====================================================
-    // SAVINGS ACCOUNT RULES
-    // =====================================================
+    private static final String RULES_PATH =
+            "src/main/resources/config/rules/";
 
-    private static final Map<String, Double> SAVINGS_MIN_BALANCE =
-            new HashMap<>();
+    private static final AccountRulesPropertiesLoader savingsRules =
+            new AccountRulesPropertiesLoader(
+                    RULES_PATH + "savings.properties"
+            );
 
-    private static final Map<String, Double> SAVINGS_INTEREST_RATE =
-            new HashMap<>();
+    private static AccountRulesPropertiesLoader currentRules;
+    private static AccountRulesPropertiesLoader fdRules;
+    private static AccountRulesPropertiesLoader salaryRules;
 
-    static {
+    // Savings Account Rules
 
-        // New: 0 to 1 year
-        SAVINGS_MIN_BALANCE.put("NEW", 10000.0);
-        SAVINGS_INTEREST_RATE.put("NEW", 2.70);
+    public static double getSavingsMinBalance(int tenureYears) {
 
-        // Standard: 1 to 3 years
-        SAVINGS_MIN_BALANCE.put("STANDARD", 7500.0);
-        SAVINGS_INTEREST_RATE.put("STANDARD", 3.00);
-
-        // Premium: 3 to 5 years
-        SAVINGS_MIN_BALANCE.put("PREMIUM", 5000.0);
-        SAVINGS_INTEREST_RATE.put("PREMIUM", 3.50);
-
-        // Privilege: 5+ years
-        SAVINGS_MIN_BALANCE.put("PRIVILEGE", 2500.0);
-        SAVINGS_INTEREST_RATE.put("PRIVILEGE", 4.00);
-    }
-
-    // =====================================================
-    // SAVINGS MINIMUM BALANCE
-    // =====================================================
-
-    public static double getSavingsMinBalance(
-            int tenureYears) {
+        String category;
 
         if (tenureYears >= 5) {
-
-            return SAVINGS_MIN_BALANCE.get("PRIVILEGE");
-
+            category = "privilege";
         } else if (tenureYears >= 3) {
-
-            return SAVINGS_MIN_BALANCE.get("PREMIUM");
-
+            category = "premium";
         } else if (tenureYears >= 1) {
-
-            return SAVINGS_MIN_BALANCE.get("STANDARD");
-
+            category = "standard";
         } else {
-
-            return SAVINGS_MIN_BALANCE.get("NEW");
+            category = "new";
         }
+
+        return savingsRules.getDouble(
+                "savings." + category + ".minBalance",
+                10000.0
+        );
     }
 
-    // =====================================================
-    // SAVINGS INTEREST RATE
-    // =====================================================
+    public static double getSavingsInterestRate(int tenureYears) {
 
-    public static double getSavingsInterestRate(
-            int tenureYears) {
+        String category;
 
         if (tenureYears >= 5) {
-
-            return SAVINGS_INTEREST_RATE.get("PRIVILEGE");
-
+            category = "privilege";
         } else if (tenureYears >= 3) {
-
-            return SAVINGS_INTEREST_RATE.get("PREMIUM");
-
+            category = "premium";
         } else if (tenureYears >= 1) {
-
-            return SAVINGS_INTEREST_RATE.get("STANDARD");
-
+            category = "standard";
         } else {
-
-            return SAVINGS_INTEREST_RATE.get("NEW");
+            category = "new";
         }
+
+        return savingsRules.getDouble(
+                "savings." + category + ".interestRate",
+                2.70
+        );
     }
 
-    // =====================================================
-    // CURRENT ACCOUNT OVERDRAFT LIMIT
-    // =====================================================
+    // Current Account Rules
 
     public static double getCurrentOverdraftLimit(
             double monthlyTurnover) {
 
-        double calculatedLimit =
-                monthlyTurnover * 2.5;
-
-        return Math.max(
-                calculatedLimit,
-                25000.0
-        );
-    }
-
-    // =====================================================
-    // FIXED DEPOSIT INTEREST RATE
-    // =====================================================
-
-    public static double getFDInterestRate(
-            int months) {
-
-        if (months >= 12) {
-
-            return 6.5;
-
+        if (currentRules == null) {
+            currentRules = new AccountRulesPropertiesLoader(
+                    RULES_PATH + "current.properties"
+            );
         }
 
-        /*
-         * The Activity 13.1 specification explicitly
-         * defines the 6.5% rate for deposits of 12+
-         * months. Rates for shorter durations are not
-         * specified in the supplied README.
-         */
+        double multiplier = currentRules.getDouble(
+                "current.overdraft.multiplier", 2.5
+        );
+
+        double minimum = currentRules.getDouble(
+                "current.overdraft.minimum", 25000.0
+        );
+
+        return Math.max(monthlyTurnover * multiplier, minimum);
+    }
+
+    // Fixed Deposit Rules
+
+    public static double getFDInterestRate(int months) {
+
+        if (fdRules == null) {
+            fdRules = new AccountRulesPropertiesLoader(
+                    RULES_PATH + "fixeddeposit.properties"
+            );
+        }
+
+        int minimumTenure = (int) fdRules.getDouble(
+                "fixeddeposit.minimumTenure", 12
+        );
+
+        double interestRate = fdRules.getDouble(
+                "fixeddeposit.interestRate", 6.5
+        );
+
+        if (months >= minimumTenure) {
+            return interestRate;
+        }
+
         return 0.0;
+    }
+
+    // Salary Account Rules
+
+    public static String getSalaryDefaultEmployer() {
+
+        if (salaryRules == null) {
+            salaryRules = new AccountRulesPropertiesLoader(
+                    RULES_PATH + "salary.properties"
+            );
+        }
+
+        return salaryRules.getProperty(
+                "salary.defaultEmployer", "Infosys"
+        );
     }
 }
