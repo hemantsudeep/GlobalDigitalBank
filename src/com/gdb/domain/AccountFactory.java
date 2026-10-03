@@ -1,7 +1,9 @@
+
 package com.gdb.domain;
 
 public class AccountFactory {
 
+    // Backward-compatible method for previous activities
     public static AbstractAccount createAccount(
             String accountType,
             String accountNumber,
@@ -10,6 +12,29 @@ public class AccountFactory {
             double balance,
             String status,
             String pin) {
+
+        return createAccount(
+                accountType,
+                accountNumber,
+                name,
+                age,
+                balance,
+                status,
+                pin,
+                0
+        );
+    }
+
+    // Activity 13.2: Factory method with dynamic tenure
+    public static AbstractAccount createAccount(
+            String accountType,
+            String accountNumber,
+            String name,
+            int age,
+            double balance,
+            String status,
+            String pin,
+            int tenureYears) {
 
         switch (accountType.toUpperCase()) {
 
@@ -20,7 +45,8 @@ public class AccountFactory {
                         age,
                         balance,
                         status,
-                        pin
+                        pin,
+                        tenureYears
                 );
 
             case "CURRENT":

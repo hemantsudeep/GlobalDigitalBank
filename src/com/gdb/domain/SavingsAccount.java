@@ -4,9 +4,11 @@ import com.gdb.exceptions.*;
 
 public class SavingsAccount extends AbstractAccount {
 
-    private double minBalance = 1000.0;
-    private double interestRate = 4.0;
+    private int tenureYears;
+    private double minBalance;
+    private double interestRate;
 
+    // Existing constructor retained for compatibility
     public SavingsAccount(String accountNumber,
                           String name,
                           int age,
@@ -14,15 +16,10 @@ public class SavingsAccount extends AbstractAccount {
                           String status,
                           String pin) {
 
-        super(accountNumber,
-                name,
-                age,
-                balance,
-                "SAVINGS",
-                status,
-                pin);
+        this(accountNumber, name, age, balance, status, pin, 0);
     }
 
+    // Existing constructor retained
     public SavingsAccount(String accountNumber,
                           String name,
                           int age,
@@ -40,8 +37,35 @@ public class SavingsAccount extends AbstractAccount {
                 status,
                 pin);
 
+        this.tenureYears = 0;
         this.minBalance = minBalance;
         this.interestRate = interestRate;
+    }
+
+    // New Activity 13.2 constructor
+    public SavingsAccount(String accountNumber,
+                          String name,
+                          int age,
+                          double balance,
+                          String status,
+                          String pin,
+                          int tenureYears) {
+
+        super(accountNumber,
+                name,
+                age,
+                balance,
+                "SAVINGS",
+                status,
+                pin);
+
+        this.tenureYears = tenureYears;
+
+        this.minBalance =
+                AccountRulesEngine.getSavingsMinBalance(tenureYears);
+
+        this.interestRate =
+                AccountRulesEngine.getSavingsInterestRate(tenureYears);
     }
 
     @Override
@@ -61,8 +85,7 @@ public class SavingsAccount extends AbstractAccount {
     public void applyInterest() {
 
         double interest =
-                this.balance *
-                        (interestRate / 100.0);
+                this.balance * (interestRate / 100.0);
 
         this.balance += interest;
     }
@@ -73,5 +96,9 @@ public class SavingsAccount extends AbstractAccount {
 
     public double getInterestRate() {
         return interestRate;
+    }
+
+    public int getTenureYears() {
+        return tenureYears;
     }
 }
