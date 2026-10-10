@@ -32,9 +32,9 @@ public abstract class AbstractAccount implements IAccount {
                     "Customer age must be 18 or above");
         }
 
-        if (balance < 0) {
+        if (balance < 0 || !Double.isFinite(balance)) {
             throw new IllegalArgumentException(
-                    "Initial balance cannot be negative");
+                    "Initial balance must be non-negative and finite");
         }
 
         if (pin == null || !pin.matches("\\d{4}")) {
@@ -101,6 +101,7 @@ public abstract class AbstractAccount implements IAccount {
         return true;
     }
 
+    // Existing deposit method retained for backward compatibility.
     @Override
     public void deposit(double amount) throws InvalidAmountException {
         if (!Double.isFinite(amount) || amount <= 0) {
@@ -111,6 +112,20 @@ public abstract class AbstractAccount implements IAccount {
         balance += amount;
     }
 
+    // Activity 16: Deposit and return its transaction record.
+    public Transaction depositWithTransaction(double amount)
+            throws InvalidAmountException {
+
+        deposit(amount);
+
+        return new Transaction(
+                TransactionType.DEPOSIT,
+                amount,
+                accountNumber,
+                "Deposit into " + accountType + " account");
+    }
+
+    // Existing withdrawal method retained for backward compatibility.
     @Override
     public void withdraw(double amount, String enteredPin)
             throws AccountException {
@@ -132,6 +147,19 @@ public abstract class AbstractAccount implements IAccount {
         processDebit(amount);
     }
 
+    // Activity 16: Withdraw and return its transaction record.
+    public Transaction withdrawWithTransaction(
+            double amount, String enteredPin) throws AccountException {
+
+        withdraw(amount, enteredPin);
+
+        return new Transaction(
+                TransactionType.WITHDRAW,
+                amount,
+                accountNumber,
+                "Withdrawal from " + accountType + " account");
+    }
+
     public abstract void processDebit(double amount)
             throws AccountException;
 
@@ -147,13 +175,11 @@ public abstract class AbstractAccount implements IAccount {
 
         if (this instanceof SavingsAccount) {
             SavingsAccount savings = (SavingsAccount) this;
-
             return balance - amount >= savings.getMinBalance();
         }
 
         if (this instanceof CurrentAccount) {
             CurrentAccount current = (CurrentAccount) this;
-
             return amount <= balance + current.getOverdraftLimit();
         }
 
