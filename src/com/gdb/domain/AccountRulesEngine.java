@@ -19,17 +19,7 @@ public class AccountRulesEngine {
 
     public static double getSavingsMinBalance(int tenureYears) {
 
-        String category;
-
-        if (tenureYears >= 5) {
-            category = "privilege";
-        } else if (tenureYears >= 3) {
-            category = "premium";
-        } else if (tenureYears >= 1) {
-            category = "standard";
-        } else {
-            category = "new";
-        }
+        String category = getTenureCategory(tenureYears);
 
         return savingsRules.getDouble(
                 "savings." + category + ".minBalance",
@@ -39,17 +29,7 @@ public class AccountRulesEngine {
 
     public static double getSavingsInterestRate(int tenureYears) {
 
-        String category;
-
-        if (tenureYears >= 5) {
-            category = "privilege";
-        } else if (tenureYears >= 3) {
-            category = "premium";
-        } else if (tenureYears >= 1) {
-            category = "standard";
-        } else {
-            category = "new";
-        }
+        String category = getTenureCategory(tenureYears);
 
         return savingsRules.getDouble(
                 "savings." + category + ".interestRate",
@@ -117,5 +97,83 @@ public class AccountRulesEngine {
         return salaryRules.getProperty(
                 "salary.defaultEmployer", "Infosys"
         );
+    }
+
+    // Activity 15: Daily Transfer Limits
+
+    public static double getDailyTransferLimit(
+            String accountType, int tenureYears) {
+
+        if (accountType == null) {
+            return 0.0;
+        }
+
+        String type = accountType
+                .toLowerCase()
+                .replaceAll("[^a-z]", "");
+
+        String category = getTenureCategory(tenureYears);
+        AccountRulesPropertiesLoader rules;
+        String prefix;
+
+        if (type.contains("savings")) {
+            rules = savingsRules;
+            prefix = "savings";
+
+        } else if (type.contains("current")) {
+            if (currentRules == null) {
+                currentRules = new AccountRulesPropertiesLoader(
+                        RULES_PATH + "current.properties"
+                );
+            }
+
+            rules = currentRules;
+            prefix = "current";
+
+        } else if (type.contains("fixeddeposit")
+                || type.equals("fd")) {
+
+            if (fdRules == null) {
+                fdRules = new AccountRulesPropertiesLoader(
+                        RULES_PATH + "fixeddeposit.properties"
+                );
+            }
+
+            rules = fdRules;
+            prefix = "fixeddeposit";
+
+        } else if (type.contains("salary")) {
+            if (salaryRules == null) {
+                salaryRules = new AccountRulesPropertiesLoader(
+                        RULES_PATH + "salary.properties"
+                );
+            }
+
+            rules = salaryRules;
+            prefix = "salary";
+
+        } else {
+            return 0.0;
+        }
+
+        return rules.getDouble(
+                prefix + "." + category + ".daily.transfer.limit",
+                0.0
+        );
+    }
+
+    // Helper: Determine account tenure category
+
+    private static String getTenureCategory(int tenureYears) {
+
+        if (tenureYears >= 5) {
+            return "privilege";
+        } else if (tenureYears >= 3) {
+            return "premium";
+        } else if (tenureYears >= 1) {
+            return "standard";
+        } else {
+            return "new";
+        }
     }
 }

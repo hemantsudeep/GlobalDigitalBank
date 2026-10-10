@@ -1,6 +1,9 @@
+
 package com.gdb.domain;
 
 import com.gdb.exceptions.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class Account {
 
@@ -11,6 +14,13 @@ public class Account {
     protected String accountType;
     protected String status;
     protected String pin;
+
+    // Activity 15: Daily Transfer Tracking
+    protected double dailyTransferTotal = 0.0;
+    protected LocalDateTime lastTransferDate = LocalDateTime.now();
+
+    // Account tenure in years
+    protected int tenureYears = 0;
 
     public Account(String accountNumber, String name, int age,
                    double balance, String accountType,
@@ -40,6 +50,8 @@ public class Account {
         this.pin = pin;
     }
 
+    // PIN Operations
+
     public boolean validatePin(String enteredPin) {
         return this.pin != null && this.pin.equals(enteredPin);
     }
@@ -58,16 +70,20 @@ public class Account {
         return true;
     }
 
+    // Deposit
+
     public void deposit(double amount)
             throws InvalidAmountException {
 
-        if (amount <= 0) {
+        if (amount <= 0 || !Double.isFinite(amount)) {
             throw new InvalidAmountException(
                     "Deposit amount must be positive");
         }
 
         this.balance += amount;
     }
+
+    // Withdrawal
 
     public void withdraw(double amount, String enteredPin)
             throws AccountException {
@@ -77,12 +93,12 @@ public class Account {
                     "Invalid PIN entered");
         }
 
-        if (!"ACTIVE".equalsIgnoreCase(this.status)) {
+        if (!isActive()) {
             throw new InactiveAccountException(
                     "Account is not active");
         }
 
-        if (amount <= 0) {
+        if (amount <= 0 || !Double.isFinite(amount)) {
             throw new InvalidAmountException(
                     "Withdrawal amount must be positive");
         }
@@ -95,6 +111,93 @@ public class Account {
         this.balance -= amount;
     }
 
+    // Activity 15: Account Status
+
+    public boolean isActive() {
+        return "ACTIVE".equalsIgnoreCase(this.status);
+    }
+
+    // Activity 15: Check available balance
+
+    public boolean canWithdraw(double amount) {
+        return Double.isFinite(amount)
+                && amount > 0
+                && amount <= balance;
+    }
+
+    // Activity 15: Daily Transfer Limit
+
+    public double getDailyTransferLimit() {
+        return AccountRulesEngine.getDailyTransferLimit(
+                getAccountType(), getTenureYears());
+    }
+
+    public double getRemainingDailyTransferLimit() {
+
+        resetDailyTransferIfNeeded();
+
+        return Math.max(
+                0.0,
+                getDailyTransferLimit() - dailyTransferTotal
+        );
+    }
+
+    public boolean canTransfer(double amount) {
+
+        resetDailyTransferIfNeeded();
+
+        return Double.isFinite(amount)
+                && amount > 0
+                && dailyTransferTotal + amount
+                <= getDailyTransferLimit();
+    }
+
+    public void updateDailyTransferTotal(double amount) {
+
+        resetDailyTransferIfNeeded();
+
+        dailyTransferTotal += amount;
+        lastTransferDate = LocalDateTime.now();
+    }
+
+    public void resetDailyTransferIfNeeded() {
+
+        if (!lastTransferDate.toLocalDate()
+                .equals(LocalDate.now())) {
+
+            dailyTransferTotal = 0.0;
+            lastTransferDate = LocalDateTime.now();
+        }
+    }
+
+    // Activity 15: Transfer Tracking Getters
+
+    public double getDailyTransferTotal() {
+        return dailyTransferTotal;
+    }
+
+    public LocalDateTime getLastTransferDate() {
+        return lastTransferDate;
+    }
+
+    // Tenure Getters and Setters
+
+    public int getTenureYears() {
+        return tenureYears;
+    }
+
+    public void setTenureYears(int tenureYears) {
+
+        if (tenureYears < 0) {
+            throw new IllegalArgumentException(
+                    "Tenure cannot be negative");
+        }
+
+        this.tenureYears = tenureYears;
+    }
+
+    // Display Account Information
+
     public void displayAccountInfo() {
 
         System.out.println("Account Number: " + accountNumber);
@@ -104,6 +207,8 @@ public class Account {
         System.out.println("Account Type: " + accountType);
         System.out.println("Status: " + status);
     }
+
+    // Existing Getters
 
     public String getAccountNumber() {
         return accountNumber;
